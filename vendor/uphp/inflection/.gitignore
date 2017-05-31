@@ -1,0 +1,6 @@
+composer.lock
+composer.phar
+apigen.neon
+bin/
+vendor/
+docs/

@@ -1,0 +1,17 @@
+{
+    "name": "uphp/mysql",
+    "description": "Este pacote serve para adicionar conexão ao mysql",
+    "authors": [
+        {
+            "name": "Renan Valente",
+            "email": "renan.a.valente@gmail.com"
+        }
+    ],
+    "require": {
+         "php": ">=7.0.0",
+         "uphp/inflection": "^1.0"
+    },
+    "autoload": {
+        "files": ["src/ActiveRecord.php"]
+    }
+}

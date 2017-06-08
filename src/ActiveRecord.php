@@ -1,19 +1,34 @@
 <?php
 namespace src;
 
-abstract class ActiveRecord {
+use Exception;
+
+require_once "traits/ActiveRecordConnection.php";
+require_once "traits/ActiveRecordPersistence.php";
+require_once "traits/ActiveRecordFinderMethods.php";
+require_once "traits/ActiveRecordPrivateMethods.php";
+
+abstract class ActiveRecord
+{
 
     use \src\traits\ActiveRecordConnection;
     use \src\traits\ActiveRecordPrivateMethods;
     use \src\traits\ActiveRecordPersistence;
     use \src\traits\ActiveRecordFinderMethods;
 
+    private static $instance;
+
     public function __construct()
     {
-        $var = require("connection.php");
-        $this->connect($var);
+        $this->connect();
+        if (empty($this->table)) $this->table = Inflection::pluralize($this->getClassName());
+    }
 
-        $this->table = Inflection::pluralize($this->getClassName());
+    private static function getInstance()
+    {
+        require __DIR__ . "\\..\\" . get_called_class() . ".php";
+        $class = ucfirst(static::getClassName());
+        return (empty(self::$instance)) ? self::$instance = new $class() : self::$instance;
     }
 
     public function __get($name)

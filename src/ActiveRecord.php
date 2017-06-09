@@ -20,13 +20,12 @@ abstract class ActiveRecord
 
     public function __construct()
     {
-        $this->connect();
         if (empty($this->table)) $this->table = Inflection::pluralize($this->getClassName());
     }
 
     private static function getInstance()
     {
-        require __DIR__ . "\\..\\" . get_called_class() . ".php";
+        require_once (__DIR__ . "/../test/" . get_called_class() . ".php");
         $class = ucfirst(static::getClassName());
         return (empty(self::$instance)) ? self::$instance = new $class() : self::$instance;
     }

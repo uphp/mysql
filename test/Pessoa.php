@@ -1,6 +1,4 @@
 <?php
-namespace test;
-
 use src\ActiveRecord;
 
 class Pessoa extends ActiveRecord

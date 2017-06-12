@@ -3,27 +3,45 @@ namespace src\traits;
 
 trait ActiveRecordPersistence
 {
-
-    private $for_update = FALSE;
-    protected $table    = NULL;
-    private $connection = NULL;
+    private static $for_update = FALSE;
+    protected static $table    = NULL;
+    private static $connection = NULL;
 
     /* BEGIN Manipulation Functions ***********************************************/
 
     // PADRAO NOVO COM RETORNO DE UM OBJETO DO TIPO INSTANCIADO
-    protected function save(){
-        if($this->for_update){
-            return $this->update();
-        }else{
-            // Codigo aqui    
-        }
+    protected function save()
+    {
+        if ($this->for_update) return $this->update();
+        return $this->create();
     }
 
     // PADRAO NOVO COM RETORNO DE UM OBJETO DO TIPO INSTANCIADO
-    protected function update(){
+    protected function update()
+    {
         // Codigo aqui
         self::connect();
         return $this;
+
+        // BEGIN MODELO EXEMPLO
+        # public function update(array $dados, $objeto = stdClass)
+        $this->resgatarTabela($objeto);
+        $this->dados = $dados;
+        $this->getSyntaxUpdate($objeto);
+        $this->execute(__FUNCTION__);
+        // END EXEMPLO
+    }
+
+    protected static function create(Array $object_array)
+    {
+        self::connect();
+
+        // BEGIN MODELO EXEMPLO
+        # public function create($objeto = stdClass)
+        $this->resgatarTabela($objeto);
+        $this->getSyntaxCreate($objeto);
+        $this->execute(__FUNCTION__);
+        // END EXEMPLO
     }
 
     // PADRAO NOVO COM RETORNO DE UM OBJETO DO TIPO INSTANCIADO
@@ -31,12 +49,13 @@ trait ActiveRecordPersistence
         // Codigo aqui
         self::connect();
         return $this;
-    }
 
-    protected static function create(Array $object_array){
-        // Codigo aqui
-        self::connect();
+        // BEGIN MODELO EXEMPLO
+        # public function delete($objeto = stdClass)
+        $this->resgatarTabela($objeto);
+        $this->getSyntaxDelete($objeto);
+        $this->execute(__FUNCTION__);
+        // END EXEMPLO
     }
     /* END Manipulation Functions *************************************************/
-
 }

@@ -4,7 +4,7 @@ namespace src\traits;
 trait ActiveRecordPersistence
 {
     private static $for_update = FALSE;
-    protected static $table    = NULL;
+    public static $table    = NULL;
     private static $connection = NULL;
 
     /* BEGIN Manipulation Functions ***********************************************/

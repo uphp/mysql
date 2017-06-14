@@ -20,7 +20,7 @@ abstract class ActiveRecord
 
     public function __construct()
     {
-        if (empty($this->table)) $this->table = Inflection::pluralize($this->getClassName());
+        if (empty(static::$table)) static::$table = Inflection::pluralize($this->getClassName());
     }
 
     private static function getInstance()

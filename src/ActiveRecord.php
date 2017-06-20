@@ -18,9 +18,15 @@ abstract class ActiveRecord
 
     private static $instance;
 
-    public function __construct()
+    public function __construct($datas = [])
     {
-        if (empty(static::$table)) static::$table = Inflection::pluralize($this->getClassName());
+        if (empty(static::$table)) static::$table = strtolower(Inflection::pluralize($this->getClassName()));
+        if (!empty($datas)) {
+            $datas = (array) $datas;
+            foreach ($datas as $key => $value) {
+                if (array_key_exists($key, $this->attributes())) $this->$key = $value;
+            }
+        }
     }
 
     private static function getInstance()
@@ -35,8 +41,8 @@ abstract class ActiveRecord
         throw new Exception("Property $name cannot be read");
     }
 
-    public function __set($name, $value)
+    /*public function __set($name, $value)
     {
         throw new Exception("Property $name cannot be set");
-    }
+    }*/
 }

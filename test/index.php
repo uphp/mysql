@@ -2,7 +2,7 @@
 require("../vendor/autoload.php");
 require ("Pessoa.php");
 
-var_dump(
+/*var_dump(
     Pessoa::find()
         ->select('*')
         ->where(['teste' => 'test'])
@@ -12,7 +12,22 @@ var_dump(
         ->limit('1')
         ->orderBy('nome')
         ->groupBy('sobrenome')
-    );die;
+    );die;*/
 //$pessoas = Pessoa::find()->db->prepare('SELECT * FROM pessoas')->execute()->fetchAll(PDO::FETCH_OBJ);
 
-var_dump($pessoas);
+/*$test = new Pessoa();
+$test->token = '123';
+$test->sexo = 'M';
+$test->nome = 'Renan';
+$test->CPF = '13543740709';
+$pessoa = new Pessoa($test);*/
+
+$pessoa = new Pessoa([
+    'token' => '123',
+    'nome' => 'Renan Valente',
+    'sexo' => true,
+    'cpf' => '13543740709',
+    'email' => 'renan.a.valente@gmail.com',
+    'tel_residencial' => '21 21379852'
+]);
+var_dump($pessoa->create());

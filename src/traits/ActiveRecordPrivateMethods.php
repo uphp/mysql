@@ -1,8 +1,13 @@
 <?php
 namespace src\traits;
 
+use PDO;
+
 trait ActiveRecordPrivateMethods
 {
+    private static $values = [];
+    private static $sql = '';
+
     private static function getClassName()
     {
         $instance_class = get_called_class(); // recebe a string da class instanciada juntamente com o namespace
@@ -10,8 +15,52 @@ trait ActiveRecordPrivateMethods
         return end($classArray); // recebe o nome da class
     }
 
+    private function getSyntaxCreate() {
+        foreach ($this->attributes() as $key => $label) {
+            if ($key != $this->primaryKey) {
+                $arrFields[$key] = ':' . $key;
+                self::$values[$key] = $this->$key;
+            }
+        }
+
+        $fields = implode(', ', array_keys($arrFields));
+        $places = implode(', ', array_values($arrFields));
+        $table = static::$table;
+        $this->execute("INSERT INTO {$table} ({$fields}) VALUES ({$places})");
+    }
+
+    private function execute($sql)
+    {
+        $stmt = self::$db->prepare($sql);
+
+        foreach (self::$values as $key => $value) {
+            switch (gettype($value)) {
+                case 'boolean':
+                    $typeParam = PDO::PARAM_INT;
+                    //$value = ($value) ? 1 : 0;
+                    break;
+                case 'integer':
+                    $typeParam = PDO::PARAM_INT;
+                    break;
+                case 'double':
+                    $typeParam = PDO::PARAM_STR;
+                    break;
+                case 'string':
+                    $typeParam = PDO::PARAM_STR;
+                    break;
+                case 'NULL':
+                    $typeParam = PDO::PARAM_NULL;
+                    break;
+                default:
+                    throw new Exception('Não conseguimos identificar o tipo passado.');
+            }
+            $stmt->bindParam(':' . $key, $value, $typeParam);
+        }
+        $stmt->execute();
+    }
+
     // EXEMPLO DE MODELOS DAS FUNCTIONS -------------------------------------------/
-    public function setTabela($tabela) {
+    /*public function setTabela($tabela) {
         $this->tabela = strtolower((String) $tabela);
     }
 
@@ -21,7 +70,7 @@ trait ActiveRecordPrivateMethods
 
     public function getResult() {
         return $this->result;
-    }
+    }*/
     
     /**
      * ****************************************
@@ -29,14 +78,14 @@ trait ActiveRecordPrivateMethods
      * ****************************************
      */
     //Resgatar Tabela
-    private function resgatarTabela($objeto = stdClass){
+    /*private function resgatarTabela($objeto = stdClass){
         if (empty($objeto->getTabela())):
             $this->tabela = strtolower(Inflection::Pluralize(get_class($objeto)));
         endif;
-    }
+    }*/
 
     //Cria a sintaxe da query para Prepared Statements
-    private function getSyntaxCreate($objeto = stdClass) {
+    /*private function getSyntaxCreate($objeto = stdClass) {
         $array = (array) $objeto;
         foreach ($array as $key => $value):
             if (substr($key, 1, strlen(get_class($objeto))) == get_class($objeto) and substr($key, 2 + strlen(get_class($objeto))) != 'id'):
@@ -49,17 +98,17 @@ trait ActiveRecordPrivateMethods
         $fields = implode(', ', array_values($fields));
         $places = ':' . implode(', :', array_values($places));
         $this->status = "INSERT INTO {$objeto->getTabela()} ({$fields}) VALUES ({$places})";
-    }
+    }*/
 
     //Cria a sintaxe da query para Prepared Statements
-    private function getSyntaxUpdate($objeto = stdClass) {
+    /*private function getSyntaxUpdate($objeto = stdClass) {
         foreach ($this->dados as $key => $value):
             $places[] = $key . ' = :' . $key;
         endforeach;
         $this->dados = array_merge($this->dados, ['id' => $objeto->getId()]);
         $places = implode(', ', $places);
         $this->status = "UPDATE {$this->tabela} SET {$places} WHERE id = :id";
-    }
+    }*/
 
     //Cria a sintaxe da query para Prepared Statements
     private function getSyntaxDelete($objeto) {

@@ -4,20 +4,30 @@ namespace src\traits;
 trait ActiveRecordPersistence
 {
     private static $for_update = FALSE;
-    public static $table    = NULL;
     private static $connection = NULL;
+    public static $table = NULL;
+    public $timeStamp = TRUE;
 
     /* BEGIN Manipulation Functions ***********************************************/
 
-    // PADRAO NOVO COM RETORNO DE UM OBJETO DO TIPO INSTANCIADO
-    protected function save()
+    public function create()
     {
-        if ($this->for_update) return $this->update();
-        return $this->create();
+        self::connect();
+        $this->getSyntaxCreate();
+        var_dump($this);
+        var_dump(self::$sql);
+        die;
+
+        // BEGIN MODELO EXEMPLO
+        # public function create($objeto = stdClass)
+        $this->resgatarTabela($objeto);
+        $this->getSyntaxCreate($objeto);
+        $this->execute(__FUNCTION__);
+        // END EXEMPLO
     }
 
     // PADRAO NOVO COM RETORNO DE UM OBJETO DO TIPO INSTANCIADO
-    protected function update()
+    public function update(Array $object_array = [])
     {
         // Codigo aqui
         self::connect();
@@ -32,20 +42,15 @@ trait ActiveRecordPersistence
         // END EXEMPLO
     }
 
-    protected static function create(Array $object_array)
+    // PADRAO NOVO COM RETORNO DE UM OBJETO DO TIPO INSTANCIADO
+    public function save()
     {
-        self::connect();
-
-        // BEGIN MODELO EXEMPLO
-        # public function create($objeto = stdClass)
-        $this->resgatarTabela($objeto);
-        $this->getSyntaxCreate($objeto);
-        $this->execute(__FUNCTION__);
-        // END EXEMPLO
+        if ($this->for_update) return $this->update();
+        return $this->create();
     }
 
     // PADRAO NOVO COM RETORNO DE UM OBJETO DO TIPO INSTANCIADO
-    protected function delete(){
+    public function delete(){
         // Codigo aqui
         self::connect();
         return $this;

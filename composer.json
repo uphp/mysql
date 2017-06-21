@@ -12,6 +12,6 @@
          "uphp/inflection": "^1.0"
     },
     "autoload": {
-        "files": ["src/ActiveRecord.php"]
+        "files": ["src/ActiveRecord.php", "src/ActiveQuery.php"]
     }
 }

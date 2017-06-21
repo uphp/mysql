@@ -9,6 +9,7 @@ class ComposerStaticInitcb3bcf05a0a60ac0f74128c2c8b21a77
     public static $files = array (
         '6104337ef3628810c5e6f631f9e5cf61' => __DIR__ . '/..' . '/uphp/inflection/src/Inflection.php',
         '5133d080287f895fff89b08958cd2b7a' => __DIR__ . '/../..' . '/src/ActiveRecord.php',
+        'e858ad1bd4fef2df313e4c5863c2a8f4' => __DIR__ . '/../..' . '/src/ActiveQuery.php',
     );
 
     public static $prefixesPsr0 = array (

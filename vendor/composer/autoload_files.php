@@ -8,4 +8,5 @@ $baseDir = dirname($vendorDir);
 return array(
     '6104337ef3628810c5e6f631f9e5cf61' => $vendorDir . '/uphp/inflection/src/Inflection.php',
     '5133d080287f895fff89b08958cd2b7a' => $baseDir . '/src/ActiveRecord.php',
+    'e858ad1bd4fef2df313e4c5863c2a8f4' => $baseDir . '/src/ActiveQuery.php',
 );

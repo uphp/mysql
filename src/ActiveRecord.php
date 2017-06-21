@@ -27,6 +27,18 @@ abstract class ActiveRecord
                 if (array_key_exists($key, $this->attributes())) $this->$key = $value;
             }
         }
+
+        if (empty(static::$auto_increment) && empty(static::$primary_key_value)) {
+            static::$primary_key_value = sha1(uniqid(rand(), TRUE));
+            $pk = static::$primary_key;
+            $this->$pk = static::$primary_key_value;
+        } elseif (empty(static::$auto_increment) && !empty(static::$primary_key_value)) {
+            $pk = static::$primary_key;
+            $this->$pk = static::$primary_key_value;
+        } else static::$primary_key_value = NULL;
+        var_dump($this);
+        var_dump(static::$primary_key_value);
+        var_dump(static::$auto_increment);
     }
 
     private static function getInstance()
@@ -45,4 +57,10 @@ abstract class ActiveRecord
     {
         throw new Exception("Property $name cannot be set");
     }*/
+
+    public function setAttributes($attributes = NULL)
+    {
+        $class = get_class($this);
+        return (empty($attributes)) ? new $class($this) : new $class($attributes);
+    }
 }

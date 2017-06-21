@@ -7,6 +7,7 @@ trait ActiveRecordPrivateMethods
 {
     private static $values = [];
     private static $sql = '';
+    private static $result;
 
     private static function getClassName()
     {
@@ -17,46 +18,94 @@ trait ActiveRecordPrivateMethods
 
     private function getSyntaxCreate() {
         foreach ($this->attributes() as $key => $label) {
-            if ($key != $this->primaryKey) {
-                $arrFields[$key] = ':' . $key;
-                self::$values[$key] = $this->$key;
-            }
+            if (static::$auto_increment && $key != static::$primary_key) continue;
+            $arrFields[$key] = ':' . $key;
+            self::$values[$key] = $this->$key;
+        }
+
+        if (! empty(static::$time_stamp)) {
+            $arrFields['created_at'] = ':created_at';
+            self::$values['created_at'] = date('Y-m-d H:i:s');
+            $arrFields['updated_at'] = ':updated_at';
+            self::$values['updated_at'] = date('Y-m-d H:i:s');
+            $arrFields['deleted_at'] = ':deleted_at';
+            self::$values['deleted_at'] = NULL;
         }
 
         $fields = implode(', ', array_keys($arrFields));
         $places = implode(', ', array_values($arrFields));
         $table = static::$table;
-        $this->execute("INSERT INTO {$table} ({$fields}) VALUES ({$places})");
+        $this->execute("INSERT INTO {$table} ({$fields}) VALUES ({$places})", __FUNCTION__);
     }
 
-    private function execute($sql)
+    protected function validationType($type = NULL, $property)
     {
-        $stmt = self::$db->prepare($sql);
+        if (is_array($type)) {
+            if (empty($this->$property)) $this->$property = $type;
+            else $this->$property = array_merge($this->$property, $type);
+            return $this;
+        } elseif (is_string($type)) {
+            $this->$property = $type;
+            return $this;
+        } else throw new Exception('Não foi possível reconhecer o tipo do parametro.');
+    }
 
-        foreach (self::$values as $key => $value) {
-            switch (gettype($value)) {
-                case 'boolean':
-                    $typeParam = PDO::PARAM_INT;
-                    //$value = ($value) ? 1 : 0;
-                    break;
-                case 'integer':
-                    $typeParam = PDO::PARAM_INT;
-                    break;
-                case 'double':
-                    $typeParam = PDO::PARAM_STR;
-                    break;
-                case 'string':
-                    $typeParam = PDO::PARAM_STR;
-                    break;
-                case 'NULL':
-                    $typeParam = PDO::PARAM_NULL;
-                    break;
-                default:
-                    throw new Exception('Não conseguimos identificar o tipo passado.');
+    private function execute($sql, $operation)
+    {
+        try {
+            self::$db->beginTransaction();
+            $stmt = self::$db->prepare($sql);
+            foreach (self::$values as $key => $value) {
+                switch (gettype($value)) {
+                    case 'boolean':
+                        $typeParam = PDO::PARAM_BOOL;
+                        break;
+                    case 'integer':
+                        $typeParam = PDO::PARAM_INT;
+                        break;
+                    case 'double':
+                        $typeParam = PDO::PARAM_STR;
+                        break;
+                    case 'string':
+                        $typeParam = PDO::PARAM_STR;
+                        break;
+                    case 'NULL':
+                        $typeParam = PDO::PARAM_NULL;
+                        break;
+                    default:
+                        throw new Exception('Não conseguimos identificar o tipo passado.');
+                }
+                $stmt->bindValue(':' . $key, $value, $typeParam);
             }
-            $stmt->bindParam(':' . $key, $value, $typeParam);
+            $stmt->execute();
+            $this->setResult($operation);
+            self::$db->commit();
+            return TRUE;
+        } catch (PDOException $e) {
+            if (stripos($e->getMessage(), 'DATABASE IS LOCKED') !== false) {
+                // This should be specific to SQLite, sleep for 0.25 seconds
+                // and try again.  We do have to commit the open transaction first though
+                self::$db->commit();
+                usleep(250000);
+            } else {
+                self::$result = NULL;
+                self::$db->rollBack();
+                throw $e;
+            }
         }
-        $stmt->execute();
+    }
+
+    private function setResult($operation)
+    {
+        if ($operation == "getSyntaxCreate") {
+            self::$result = self::$db->lastInsertId();
+        } elseif ($operation == "getSyntaxDelete") {
+            self::$result = true;
+        } elseif ($operation == "getSyntaxFind" || $operation == "getSyntaxFindOne" || $operation == "getSyntaxFindAll") {
+            (self::$db->rowCount() == 1) ? self::$result = self::$db->fetch() : self::$result = self::$db->fetchAll();
+        } elseif ($operation == 'getSyntaxUpdate') {
+            self::$result = true;
+        }
     }
 
     // EXEMPLO DE MODELOS DAS FUNCTIONS -------------------------------------------/
@@ -152,16 +201,4 @@ trait ActiveRecordPrivateMethods
     //        WSErro("<b>Erro ao cadastrar:</b> {$e->getMessage()}", $e->getCode());
     //    }
     //}
-
-    private function setResult($operacao) {
-        if ($operacao == "create"):
-            $this->result = $this->conn->lastInsertId();
-        elseif ($operacao == "delete"):
-            $this->result = true;
-        elseif ($operacao == "find" || $operacao == 'findSQL'):
-            ($this->status->rowCount() == 1) ? $this->result = $this->status->fetch() : $this->result = $this->status->fetchAll();
-        elseif($operacao == 'update'):
-            $this->result = true;
-        endif;
-    }
 }

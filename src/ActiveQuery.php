@@ -3,12 +3,12 @@ namespace src;
 
 class ActiveQuery extends ActiveRecord
 {
-    private static $class;
+    private $class;
 
     public function __construct($class)
     {
         parent::__construct();
-        self::$class = $class;
+        $this->class = $class;
     }
 
     public function select($type = NULL)
@@ -54,5 +54,18 @@ class ActiveQuery extends ActiveRecord
     public function one()
     {
         //
+    }
+
+    // PRIVATE
+    private function validationType($type = NULL, $property)
+    {
+        if (is_array($type)) {
+            if (empty($this->$property)) $this->$property = $type;
+            else $this->$property = array_merge($this->$property, $type);
+            return $this;
+        } elseif (is_string($type)) {
+            $this->$property = $type;
+            return $this;
+        } else throw new Exception('Não foi possível reconhecer o tipo do parametro.');
     }
 }

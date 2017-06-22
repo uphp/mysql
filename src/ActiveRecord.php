@@ -20,7 +20,8 @@ abstract class ActiveRecord
 
     public function __construct($datas = [])
     {
-        if (empty(static::$table)) static::$table = strtolower(Inflection::pluralize($this->getClassName()));
+        if (empty($this->table)) $this->table = strtolower(Inflection::pluralize($this->getClassName()));
+
         if (!empty($datas)) {
             $datas = (array) $datas;
             foreach ($datas as $key => $value) {
@@ -28,24 +29,14 @@ abstract class ActiveRecord
             }
         }
 
-        if (empty(static::$auto_increment) && empty(static::$primary_key_value)) {
-            static::$primary_key_value = sha1(uniqid(rand(), TRUE));
-            $pk = static::$primary_key;
-            $this->$pk = static::$primary_key_value;
-        } elseif (empty(static::$auto_increment) && !empty(static::$primary_key_value)) {
-            $pk = static::$primary_key;
-            $this->$pk = static::$primary_key_value;
-        } else static::$primary_key_value = NULL;
-        var_dump($this);
-        var_dump(static::$primary_key_value);
-        var_dump(static::$auto_increment);
-    }
-
-    private static function getInstance()
-    {
-        require_once (__DIR__ . "/../test/" . get_called_class() . ".php");
-        $class = ucfirst(static::getClassName());
-        return (empty(self::$instance)) ? self::$instance = new $class() : self::$instance;
+        if (empty($this->auto_increment) && empty($this->primary_key_value)) {
+            $this->primary_key_value = sha1(uniqid(rand(), TRUE));
+            $pk = $this->primary_key;
+            $this->$pk = $this->primary_key_value;
+        } elseif (empty($this->auto_increment) && !empty($this->primary_key_value)) {
+            $pk = $this->primary_key;
+            $this->$pk = $this->primary_key_value;
+        }
     }
 
     public function __get($name)
@@ -58,9 +49,17 @@ abstract class ActiveRecord
         throw new Exception("Property $name cannot be set");
     }*/
 
-    public function setAttributes($attributes = NULL)
+    public function setAttributes($datas)
     {
-        $class = get_class($this);
-        return (empty($attributes)) ? new $class($this) : new $class($attributes);
+        $datas = (array) $datas;
+        $attrs = $this->attributes();
+        foreach ($attrs as $attr => $label) {
+            if (isset($datas[$attr])) $this->$attr = $datas[$attr];
+        }
+    }
+
+    public function oldValues()
+    {
+        return $this->oldValues;
     }
 }

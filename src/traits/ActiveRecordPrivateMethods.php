@@ -5,9 +5,16 @@ use PDO;
 
 trait ActiveRecordPrivateMethods
 {
-    private static $values = [];
-    private static $sql = '';
-    private static $result;
+    private $oldValues = [];
+    //private $sql;
+    private $result;
+
+    private static function getInstance()
+    {
+        require_once (__DIR__ . "/../test/" . get_called_class() . ".php");
+        $class = ucfirst(static::getClassName());
+        return (empty(self::$instance)) ? self::$instance = new $class() : self::$instance;
+    }
 
     private static function getClassName()
     {
@@ -16,38 +23,28 @@ trait ActiveRecordPrivateMethods
         return end($classArray); // recebe o nome da class
     }
 
-    private function getSyntaxCreate() {
+    private function getSyntaxCreate() 
+    {
         foreach ($this->attributes() as $key => $label) {
-            if (static::$auto_increment && $key != static::$primary_key) continue;
+            if ($this->auto_increment && $key === $this->primary_key) continue;
+            if (! isset($this->$key)) continue;
             $arrFields[$key] = ':' . $key;
-            self::$values[$key] = $this->$key;
+            $this->oldValues[$key] = $this->$key;
         }
 
-        if (! empty(static::$time_stamp)) {
+        if (! empty($this->time_stamp)) {
             $arrFields['created_at'] = ':created_at';
-            self::$values['created_at'] = date('Y-m-d H:i:s');
+            $this->oldValues['created_at'] = date('Y-m-d H:i:s');
             $arrFields['updated_at'] = ':updated_at';
-            self::$values['updated_at'] = date('Y-m-d H:i:s');
+            $this->oldValues['updated_at'] = date('Y-m-d H:i:s');
             $arrFields['deleted_at'] = ':deleted_at';
-            self::$values['deleted_at'] = NULL;
+            $this->oldValues['deleted_at'] = NULL;
         }
 
         $fields = implode(', ', array_keys($arrFields));
         $places = implode(', ', array_values($arrFields));
-        $table = static::$table;
+        $table = $this->table;
         $this->execute("INSERT INTO {$table} ({$fields}) VALUES ({$places})", __FUNCTION__);
-    }
-
-    protected function validationType($type = NULL, $property)
-    {
-        if (is_array($type)) {
-            if (empty($this->$property)) $this->$property = $type;
-            else $this->$property = array_merge($this->$property, $type);
-            return $this;
-        } elseif (is_string($type)) {
-            $this->$property = $type;
-            return $this;
-        } else throw new Exception('Não foi possível reconhecer o tipo do parametro.');
     }
 
     private function execute($sql, $operation)
@@ -55,7 +52,7 @@ trait ActiveRecordPrivateMethods
         try {
             self::$db->beginTransaction();
             $stmt = self::$db->prepare($sql);
-            foreach (self::$values as $key => $value) {
+            foreach ($this->oldValues as $key => $value) {
                 switch (gettype($value)) {
                     case 'boolean':
                         $typeParam = PDO::PARAM_BOOL;
@@ -88,7 +85,7 @@ trait ActiveRecordPrivateMethods
                 self::$db->commit();
                 usleep(250000);
             } else {
-                self::$result = NULL;
+                $this->result = NULL;
                 self::$db->rollBack();
                 throw $e;
             }
@@ -98,13 +95,13 @@ trait ActiveRecordPrivateMethods
     private function setResult($operation)
     {
         if ($operation == "getSyntaxCreate") {
-            self::$result = self::$db->lastInsertId();
+            $this->result = self::$db->lastInsertId();
         } elseif ($operation == "getSyntaxDelete") {
-            self::$result = true;
+            $this->result = true;
         } elseif ($operation == "getSyntaxFind" || $operation == "getSyntaxFindOne" || $operation == "getSyntaxFindAll") {
-            (self::$db->rowCount() == 1) ? self::$result = self::$db->fetch() : self::$result = self::$db->fetchAll();
+            (self::$db->rowCount() == 1) ? $this->result = self::$db->fetch() : $this->result = self::$db->fetchAll();
         } elseif ($operation == 'getSyntaxUpdate') {
-            self::$result = true;
+            $this->result = true;
         }
     }
 

@@ -8,12 +8,16 @@ require ("Pessoa.php");
         ->where(['teste' => 'test'])
         ->andWhere(['nome' => 'renan'])
         ->andWhere(['sexo' => 'm'])
-        ->orWhere("or (sobrenome = 'valente')")
+        ->andWhere(['nascimento', '>=', '2000-01-01'])
+        ->orWhere("sobrenome = 'valente'")
         ->limit('1')
         ->orderBy('nome')
         ->groupBy('sobrenome')
     );die;*/
 //$pessoas = Pessoa::find()->db->prepare('SELECT * FROM pessoas')->execute()->fetchAll(PDO::FETCH_OBJ);
+
+var_dump(Pessoa::findOne(['token' => '123', 'nome' => ['Renan Valente', 'almeida', 'renan']]));
+var_dump(Pessoa::findOne(1741));die;
 
 /*$test = new Pessoa();
 $test->token = '123';

@@ -16,19 +16,19 @@ class ActiveQuery extends ActiveRecord
         return $this->validationType($type, __FUNCTION__);
     }
 
-    public function where($type = NULL)
+    public function where($args = NULL)
     {
-        return $this->validationType($type, __FUNCTION__);
+        return $this->validationType($args, __FUNCTION__);
     }
 
-    public function andWhere($type = NULL)
+    public function andWhere($args = NULL)
     {
-        return $this->validationType($type, __FUNCTION__);
+        return $this->validationType($args, __FUNCTION__);
     }
 
-    public function orWhere($type = NULL)
+    public function orWhere($args = NULL)
     {
-        return $this->validationType($type, __FUNCTION__);
+        return $this->validationType($args, __FUNCTION__);
     }
 
     public function limit($type = NULL)
@@ -57,14 +57,14 @@ class ActiveQuery extends ActiveRecord
     }
 
     // PRIVATE
-    private function validationType($type = NULL, $property)
+    private function validationType($args = NULL, $property)
     {
-        if (is_array($type)) {
-            if (empty($this->$property)) $this->$property = $type;
-            else $this->$property = array_merge($this->$property, $type);
+        if (is_array($args)) {
+            if (empty($this->$property)) $this->$property = $args;
+            else $this->$property = array_merge($this->$property, $args);
             return $this;
-        } elseif (is_string($type)) {
-            $this->$property = $type;
+        } elseif (is_string($args)) {
+            $this->$property = $args;
             return $this;
         } else throw new Exception('Não foi possível reconhecer o tipo do parametro.');
     }

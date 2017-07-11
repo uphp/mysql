@@ -8,10 +8,14 @@
         }
     ],
     "require": {
-         "php": ">=7.0.0",
-         "uphp/inflection": "^1.0"
+        "php": ">=7.0.0",
+        "uphp/inflection": "^1.0",
+        "uphp/exception": ">0.0.0",
+        "uphp/languages": "^0.0.2"
     },
     "autoload": {
-        "files": ["src/ActiveRecord.php", "src/ActiveQuery.php"]
+        "psr-4": {
+            "UPhp\\Model\\": "src/"
+        }
     }
 }

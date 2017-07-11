@@ -1,5 +1,5 @@
 <?php
-namespace src;
+namespace UPhp\Model;
 
 class ActiveQuery extends ActiveRecord
 {

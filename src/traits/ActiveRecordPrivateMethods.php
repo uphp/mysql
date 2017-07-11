@@ -1,5 +1,5 @@
 <?php
-namespace src\traits;
+namespace uphp\model\traits;
 
 use PDO;
 
@@ -116,7 +116,9 @@ trait ActiveRecordPrivateMethods
     private function setResult($operation, $stmt = NULL)
     {
         if ($operation === "getSyntaxCreate") {
-            $this->result = self::$db->lastInsertId();
+            if ($this->auto_increment) {
+                $this->result = self::$db->lastInsertId();
+            } else $this->result = TRUE;
             $this->for_update = TRUE;
         } elseif ($operation === "getSyntaxDelete" || $operation === "getSyntaxUpdate") {
             $this->result = TRUE;

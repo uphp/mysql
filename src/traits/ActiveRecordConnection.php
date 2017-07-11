@@ -1,5 +1,5 @@
 <?php
-namespace src\traits;
+namespace uphp\model\traits;
 
 use Exception;
 use PDO;

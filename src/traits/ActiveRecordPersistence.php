@@ -1,5 +1,5 @@
 <?php
-namespace src\traits;
+namespace uphp\model\traits;
 
 trait ActiveRecordPersistence
 {
@@ -101,7 +101,8 @@ trait ActiveRecordPersistence
     }
 
     // PADRAO NOVO COM RETORNO DE UM OBJETO DO TIPO INSTANCIADO
-    public function delete(){
+    public function delete()
+    {
         // Codigo aqui
         self::connect();
         return $this;

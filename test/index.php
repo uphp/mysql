@@ -2,6 +2,7 @@
 require("../vendor/autoload.php");
 require ("Pessoa.php");
 
+var_dump(new Pessoa);
 /*var_dump(
     Pessoa::find()
         ->select('*')

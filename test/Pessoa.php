@@ -1,5 +1,5 @@
 <?php
-use src\ActiveRecord;
+use uphp\model\ActiveRecord;
 
 class Pessoa extends ActiveRecord
 {

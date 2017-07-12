@@ -1,1 +1,0 @@
-Repositório do plugin Inflection irregular para mdb framework

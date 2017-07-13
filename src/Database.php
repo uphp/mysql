@@ -45,6 +45,31 @@ class Database
         throw new Exception("Property $name cannot be set");
     }*/
 
+    public static function descDatabase()
+    {
+        self::getConn();
+        $pre = self::$db->prepare("show tables;");
+        $pre->execute();
+
+        //$resultArr = [];
+        $table = "";
+        $arrColumns = [];
+        while ($obj = $pre->fetchObject()) {
+            $table = key($obj);
+            $desc = self::$db->prepare("desc " . $obj->$table);
+            $desc->execute();
+            while ($column = $desc->fetchObject()) {
+                $arrColumns[$obj->$table][] = $column->Field;
+            }
+            //$resultArr[] = $obj;
+        }
+        $base = strrchr($table, '_'); $base = str_replace('_', '', $base);
+        //var_dump($base);
+        return [$base => $arrColumns];
+        //var_dump($arrColumns);
+        //self::$db = NULL;
+    }
+
     public function setAttributes($datas)
     {
         $datas = (array) $datas;

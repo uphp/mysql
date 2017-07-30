@@ -1,5 +1,5 @@
 <?php
-namespace uphp\model\traits;
+namespace UPhp\Model\traits;
 
 trait ActiveRecordPersistence
 {
